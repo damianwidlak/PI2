@@ -1,0 +1,82 @@
+<?php
+$this->headScript()->appendFile(
+    'https://maps.googleapis.com/maps/api/js?key=AIzaSyB_s-LXrbjdnWghWb_xHaJ8UsEMYVO0YZw&callback=initMap',
+    'text/javascript',
+    ['async' => true, 'defer' => true]
+);
+?>
+
+<script>
+let map;
+
+function initMap() {
+    const latlng = new google.maps.LatLng(52.24588095869954, 20.940241813659668);
+    const myOptions = {
+        zoom: 15,
+        center: latlng,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
+    map = new google.maps.Map(
+        document.getElementById("map"),
+        myOptions
+    );
+
+    const markers = [];
+    const coordinates = [
+        new google.maps.LatLng(52.24588095869954, 20.940241813659668),	// newelska 6
+        new google.maps.LatLng(52.244633,20.939232),					// ks. janusza 47
+        new google.maps.LatLng(52.231263,21.011265),					// marszłkowska 100/102
+        new google.maps.LatLng(52.198559,20.981289),					// racławicka 144
+        new google.maps.LatLng(52.155452,21.035126),					// al. KEN 85
+    ];
+    const latlngbounds = new google.maps.LatLngBounds();
+
+    for(let i=0; i<coordinates.length; i++) {
+        markers[i] = new google.maps.Marker({
+            position: coordinates[i],
+            map: map,
+            title:"Marker nr " + i
+        });
+
+        addInfo(markers[i], "<strong>Okno informacyjne</strong><br/>Marker nr " + i);
+
+        latlngbounds.extend(coordinates[i]);
+    }
+
+    map.fitBounds(latlngbounds);
+
+    const lat = localStorage.getItem('lat')
+    const lng = localStorage.getItem('lng')
+
+    if (lat && lng) {
+        map.setCenter(new google.maps.LatLng(lat, lng))
+    }
+
+    map.addListener("center_changed", () => {
+        const lat = map.getCenter().lat();
+        const lng = map.getCenter().lng();
+
+        localStorage.setItem('lat', lat)
+        localStorage.setItem('lng', lng)
+        // console.log(lat, lng)
+    });
+}
+
+function addInfo(marker, content)
+{
+	const infowindow = new google.maps.InfoWindow({ content	});
+
+    marker.addListener("click", () => {
+        infowindow.open(map, marker);
+    });
+}
+</script>
+
+<div class="row">
+    <div class="col-md-12">
+        <h1>Google Maps</h1>
+    </div>
+    <div class="col-md-12">
+        <div id="map" style="width: 800px; height: 600px;"></div>
+    </div>
+</div>

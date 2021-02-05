@@ -1,0 +1,44 @@
+<h2>Lista nieruchomości</h2>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>Lp</th>
+        <th>Typ nieruchomości</th>
+        <th>Typ oferty</th>
+        <th>Miasto</th>
+        <th>Numer</th>
+        <th>Cena</th>
+        <th>Powierzchnia</th>
+        <th></th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    <?php if (empty($dane)): ?>
+        <tr>
+            <td colspan="9">Brak danych</td>
+        </tr>
+    <?php else: ?>
+        <?php foreach ($dane as $i => $d): ?>
+            <tr>
+                <td><?= $i + 1 ?> / <?=$d['id_miasto']?></td>
+                <td><?= $d['typ_nieruchomosci'] ?></td>
+                <td><?= $d['typ_oferty'] ?></td>
+                <td><?= $d['miasto'] ?></td>
+                <td><?= $d['numer'] ?></td>
+                <td><?= $d['cena'] ?></td>
+                <td><?= $d['powierzchnia'] ?></td>
+                <td><a href="<?= $this->url('api-klient/akcje', ['action' => 'index', 'id' => $d['id']]) ?>" title="Edytuj">Edytuj<i class="far fa-edit"></i></a></td>
+                <td><a href="<?= $this->url('api-klient/akcje', ['action' => 'usun', 'id' => $d['id']]) ?>" title="Usuń">Usuń<i class="far fa-trash-alt"></i></a></td>
+
+            </tr>
+        <?php endforeach; ?>
+    <?php endif; ?>
+    </tbody>
+</table>
+<?php if (!empty($miasta)): ?>
+<?php foreach ($miasta as $i => $d): ?>
+    <span style="padding: 5px; margin: 2px; background-color: #95999c;"><?= $i?>: <?= $d?></span>
+<?php endforeach; ?>
+<?php endif; ?>

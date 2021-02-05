@@ -1,0 +1,19 @@
+<h2>Dodawanie nieruchomości</h2>
+
+<? if (!empty($komunikat)): ?>
+    <div class="row">
+        <div class="col-lg-4">
+            <?php if (!empty($komunikat['success'])): ?>
+                <div class="alert alert-success" role="alert"><?= $komunikat['success'] ?></div>
+            <?php elseif (!empty($komunikat['danger'])): ?>
+                <div class="alert alert-danger" role="alert"><?= $komunikat['danger'] ?></div>
+            <?php endif; ?>
+        </div>
+    </div>
+<? endif; ?>
+
+<div class="row">
+    <div class="col-lg-4">
+        <?=$this->form($form) ?>
+    </div>
+</div>

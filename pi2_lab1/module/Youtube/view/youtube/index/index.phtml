@@ -1,0 +1,99 @@
+<?php
+$this->inlineScript()->captureStart();
+echo <<<JS
+    $(function () {
+		$("a.player").click(function () {
+			const id = $(this).data('id');
+            const html = '<iframe width="640" height="360" src="//www.youtube.com/embed/' + id + '" frameborder="0" allowfullscreen></iframe>';
+
+			$("#modal .modal-body").html(html);
+			$('#modal').modal('show');
+
+			return false;
+		});
+
+		$(".aShowComments").click(function () {
+			$("#modal .modal-body").load($(this).attr('href'), function () {
+				$('#modal').modal('show');
+            });
+
+			return false;
+		});
+        $("#modal").on('click', '.nextComment', function() {
+            $("#modal .modal-body").load($(this).attr('href'), function () {
+				$('#modal').modal('show');
+            });
+
+            return false;
+        });
+		$("#overlay").hide();
+	});
+JS;
+$this->inlineScript()->captureEnd();
+?>
+
+<div class="row">
+    <div class="col-md-12">
+        <h1>
+            Youtube
+            <small><?= $this->title ?></small>
+            <a href="<?= $this->url('youtube/default', ['action' => 'search']) ?>" class="pull-right" title="Szukaj"><i class="glyphicon glyphicon-search"></i></a>
+        </h1>
+    </div>
+</div>
+
+<?php foreach ($this->films as $f) : ?>
+    <div class="row" style="margin-bottom: 10px;">
+        <div class="col-md-2">
+            <a href="#" class="player" data-id="<?= $f['id'] ?>">
+                <img src="<?= $f['snippet']['thumbnails']['default']['url'] ?>" alt="thumbnail" class="img-thumbnail" />
+            </a>
+        </div>
+        <div class="col-md-10">
+            <p>
+                Tytuł: <strong><?= $f['snippet']['title'] ?></strong><br />
+                Wyświetleń: <strong><?= $f['statistics']['viewCount'] ?></strong><br />
+                Komentarzy: <strong><a href="<?= $this->url('youtube/default', ['action' => 'comments', 'id' => $f['id']]) ?>" title="Pokaż komentarze" class="aShowComments"><?= $f['statistics']['commentCount'] ?></a></strong><br />
+                Tagi:
+                <?php foreach ($f['snippet']['tags'] as $tag) :  ?>
+                    <span style="background-color:#fff; margin: 2px;"><?= $tag ?> </span>
+                <?php endforeach; ?>
+            </p>
+        </div>
+    </div>
+<?php endforeach; ?>
+
+<nav>
+    <ul class="pagination justify-content-center">
+        <?php if (!empty($this->films->prevPageToken)) : ?>
+            <li class="page-item">
+                <a href="<?= $this->url('youtube/default', ['action' => $this->action], ['query' => ['page-token' => $this->films->prevPageToken, 'phrase' => $this->phrase]]) ?>" class="page-link">
+                    Poprzednia
+                </a>
+            </li>
+        <?php else : ?>
+            <li class="page-item disabled"><a href="#" class="page-link">Poprzednia</a></li>
+        <?php endif; ?>
+
+        <?php if (!empty($this->films->nextPageToken)) : ?>
+            <li class="page-item">
+                <a href="<?= $this->url('youtube/default', ['action' => $this->action], ['query' => ['page-token' => $this->films->nextPageToken, 'phrase' => $this->phrase]]) ?>" class="page-link">
+                    Następna
+                </a>
+            </li>
+        <?php else : ?>
+            <li class="page-item disabled"><a href="#" class="page-link">Następna</a></li>
+        <?php endif; ?>
+    </ul>
+</nav>
+
+<div class="modal fade" id="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-body text-center"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
+            </div>
+        </div>
+    </div>
+</div>

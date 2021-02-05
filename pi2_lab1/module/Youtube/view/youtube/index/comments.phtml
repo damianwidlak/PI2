@@ -1,0 +1,32 @@
+<nav>
+  <ul class="pagination justify-content-center">
+    <?php if (!empty($this->comments->nextPageToken)) : ?>
+      <li class="page-item">
+        <a href="<?= $this->url('youtube/default', ['action' =>  'comments', 'id' => $this->id], ['query' => ['page-token' => $this->comments->nextPageToken, 'phrase' => $this->phrase]]) ?>" class="page-link nextComment">
+          Więcej komentarzy
+        </a>
+      </li>
+    <?php else : ?>
+      <li class="page-item disabled"><a href="#" class="page-link">Nie ma więcej komentarzy(</a></li>
+    <?php endif; ?>
+  </ul>
+</nav>
+
+<?php
+
+foreach ($this->comments as $comment) : ?>
+  <div class="row" style="margin: 10px 10px 10px;background-color:#ddd;">
+    <div class="col-md-2">
+      <img style="margin:10px;" src='<?= $comment['snippet']['topLevelComment']['snippet']['authorProfileImageUrl'] ?>'></img><br />
+
+    </div>
+    <div class="col-md-10" style="text-align: left;">
+
+      <p><strong> Autor: <?= $comment['snippet']['topLevelComment']['snippet']['authorDisplayName'] ?> </strong></p>
+      <p>Liczba odpowiedzi: <?= $comment['snippet']['totalReplyCount'] ?></p>
+      <p>Data publikacji: <?= $comment['snippet']['topLevelComment']['snippet']['publishedAt'] ?></p>
+      <p><strong>Treść: <?= $comment['snippet']['topLevelComment']['snippet']['textDisplay'] ?></strong></p>
+    </div>
+  </div>
+
+<?php endforeach; ?>

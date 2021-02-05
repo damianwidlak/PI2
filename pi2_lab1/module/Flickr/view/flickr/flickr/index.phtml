@@ -1,0 +1,86 @@
+<?php
+$this->inlineScript()->captureStart();
+echo <<<JS
+    $(function () {
+
+		$(".aShowImage").click(function () {
+			$("#modal .modal-body").load($(this).attr('href'), function () {
+				$('#modal').modal('show');
+            });
+			return false;
+		});
+		$("#overlay").hide();
+	});
+JS;
+$this->inlineScript()->captureEnd();
+?>
+
+<div class="row">
+    <div class="col-lg-4">
+        <?= $this->form()->openTag($form) ?>
+
+        <div class="form-group">
+            <?= $this->formLabel($form->get('phrase')) ?>
+            <?= $this->formText($form->get('phrase')) ?>
+            <?= $this->formElementErrors($form->get('phrase'), ['class' => 'help-block']) ?>
+        </div>
+
+        <?= $this->formSubmit($form->get('search')) ?>
+
+        <?= $this->form()->closeTag($form) ?>
+    </div>
+    <div class="col-md-12">
+        <h1>Zdjęcia</h1>
+    </div>
+    <div class="col-md-12">
+
+        <?php
+        $page = $this->photos->photos->page;
+
+        $url = "https://farm%s.staticflickr.com/%s/%s_%s_s.jpg";
+        foreach ($this->photos->photos->photo as $p) {
+            echo "<a  class='aShowImage' href='" . $this->url('flickr/default', ['action' => 'details', 'id' => $p->id]) . "'>";
+            echo "<img src='" . sprintf($url, $p->farm, $p->server, $p->id, $p->secret) . "'>";
+            echo "</>";
+        }
+        ?>
+
+
+    </div>
+</div>
+<nav>
+    <ul class="pagination justify-content-center">
+        <?php if ($page > 1) : ?>
+            <li class="page-item">
+                <a href="<?= $this->url('flickr/default', ['action' => 'index', 'id' => $page - 1], ['query' =>
+                            ['phrase' => $form->get('phrase')->getValue()]]) ?>" class="page-link">
+                    Poprzednia
+                </a>
+            </li>
+        <?php else : ?>
+            <li class="page-item disabled"><a href="#" class="page-link">Poprzednia</a></li>
+        <?php endif; ?>
+
+        <?php if ($page < $this->photos->photos->pages) : ?>
+            <li class="page-item">
+                <a href="<?= $this->url('flickr/default', ['action' => 'index', 'id' => $page + 1], ['query' =>
+                            ['phrase' => $form->get('phrase')->getValue()]]) ?>" class="page-link">
+                    Następna
+                </a>
+            </li>
+        <?php else : ?>
+            <li class="page-item disabled"><a href="#" class="page-link">Następna</a></li>
+        <?php endif; ?>
+    </ul>
+</nav>
+
+<div class="modal fade" id="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-body text-center"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
+            </div>
+        </div>
+    </div>
+</div>

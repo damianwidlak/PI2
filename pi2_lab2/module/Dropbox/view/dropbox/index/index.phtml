@@ -1,0 +1,179 @@
+<?php
+$this->headScript()->appendFile($this->basePath('/js/z_edytor.js'));
+
+$nazwaPliku = new \Laminas\Form\Element\Text('nazwaPliku');
+$nazwaPliku->setAttributes(['size' => 30, 'placeholder' => 'Podaj nazwę pliku']);
+$nazwaPliku->setLabel("Nazwa pliku");
+
+$zawartoscPliku = new \Laminas\Form\Element\Textarea('zawartoscPliku');
+$zawartoscPliku->setAttributes(['rows' => 10, 'placeholder' => 'Podaj zawartość pliku']);
+$zawartoscPliku->setLabel("Zawartość pliku");
+
+$nazwaKatalogu = new \Laminas\Form\Element\Text('nazwaKatalogu');
+$nazwaKatalogu->setAttributes(['size' => 30, 'placeholder' => 'Podaj nazwę katalogu']);
+$nazwaKatalogu->setLabel("Nazwa katalogu");
+
+$updir_path = implode('/', array_slice(explode('/', $this->path), 0, -1));
+$updir = [
+        'path' => $updir_path,
+        '.tag' => 'folder',
+        'size' => '0',
+        'name' => '..',
+        'path_lower' => $updir_path
+];
+?>
+
+<h1>Lista plików</h1>
+<h2>Katalog: <?=$this->path?></h2>
+<?= $updir_path ?>
+<?php if (!empty($this->msg)): ?>
+    <div class="alert alert-danger">
+        <?= $this->msg ?>
+    </div>
+<?php else: ?>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th style=" white-space: nowrap;width: 1%;" >Lp</th>
+            <th style=" white-space: nowrap;width: 1%;">Typ</th>
+            <th>Nazwa</th>
+            <th style=" white-space: nowrap;width: 1%;">Ostatnia modyfikacja</th>
+            <th style=" white-space: nowrap;width: 1%;">Rozmiar</th>
+            <th style=" white-space: nowrap;width: 1%;"></th>
+            <th style=" white-space: nowrap;width: 1%;"></th>
+            <th style=" white-space: nowrap;width: 1%;"></th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php if (empty($this->files)) {
+
+            $this->files = [ (object) $updir];
+
+        } else {
+
+            if ($this->path != '') {
+                $this->files = array_merge([(object) $updir], $this->files);
+            }
+        }
+        ?>
+        <?php if (empty($this->files)): ?>
+            <tr>
+                <td colspan="7">Brak plików</td>
+            </tr>
+        <?php else: ?>
+            <?php foreach ($this->files as $i => $file): ?>
+                <?php $is_file = $file->{'.tag'} == 'file' ?>
+                <tr>
+                    <td><?= $i + 1 ?></td>
+                    <td> <span style="font-size: 20px;">
+                        <?php if ($is_file): ?>
+                            <span style="color: Gray;"><i class="fas fa-file-alt"></i></span>
+                        <?php else: ?>
+                            <span style="color: DimGray ;"><i class="fas fa-folder-open"></i></span>
+                        <?php endif; ?>
+                        </span>
+                    </td>
+                    <td>
+                        <?php if ($is_file): ?>
+                            <?= $file->name ?>
+                        <?php else: ?>
+                            <a href="<?= $this->url('dropbox/akcje', ['action' => 'index'], ['query' => ['path' => $file->path_lower]]) ?>" title="<?= $file->name ?>"><?= $file->name ?></a>
+                        <?php endif; ?>
+                    </td>
+                    <td> <?php if ($is_file){
+                            $date = new DateTime($file->client_modified);
+                            echo $date->format('Y-m-d H:i');
+                            } ?>
+                    </td>
+                    <td> <?php if ($is_file): ?><?= $file->size ?> <?php endif; ?>
+                    </td>
+                    <td><span style="font-size: 20px;">
+                        <?php if ($is_file): ?>
+                        <a href="<?= $this->url('dropbox/akcje', ['action' => 'pobierz'], ['query' => ['path' => $file->path_lower]]) ?>" title="Pobierz"><i
+                                    class="fas fa-file-download"></i></a>
+                        <?php endif; ?>
+                    </span></td>
+                    <td><span style="font-size: 20px;">
+                        <?php if ($is_file): ?>
+                            <a href="#" class='btnEdytuj' data-toggle="modal" data-target="#modalEdycja" title="Edytuj" data-filename="<?= $file->path_lower ?>"><i
+                                        class="fas fa-edit" ></i></a>
+                        <?php endif; ?>
+                        </span></td>
+                    <td><span style="font-size: 20px;">
+                        <?php if ($file->name != '..'): ?>
+                        <a href="<?= $this->url('dropbox/akcje', ['action' => 'usun'], ['query' => ['path' => $file->path_lower]]) ?>" title="Usuń"><i
+                                    class="far fa-trash-alt"></i></a>
+                        <?php endif; ?>
+                        </span></td>
+                </tr>
+            <?php endforeach; ?>
+        <?php endif; ?>
+        </tbody>
+    </table>
+<?php endif; ?>
+
+<p>
+    <button type="button" class="btn btn-primary btnEdytuj" data-toggle="modal" data-target="#modalKatalog"  data-action="new">
+        Dodaj katalog
+    </button>
+    <button type="button" class="btn btn-primary btnEdytuj" data-toggle="modal" data-target="#modalEdycja"  data-action="new">
+        Dodaj plik
+    </button>
+</p>
+<div class="modal fade" id="modalKatalog" tabindex="-1" role="dialog" aria-labelledby="modalKatalogTytul" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalKatalogTytul">Podaj nazwę katalogu</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="<?= $this->url('dropbox/akcje', ['action' => 'dodajKatalog'], ['query' => ['path' => $this->path]]) ?>" id="formKatalog">
+                    <div class="form-group">
+                        <?= $this->formLabel($nazwaKatalogu) ?>
+                        <?= $this->formElement($nazwaKatalogu) ?>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" type="button" id="btnKatalogWyslij">
+                    Wyślij
+                </button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEdycja" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Edytor</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="<?= $this->url('dropbox/akcje', ['action' => 'dodaj'], ['query' => ['path' => $this->path]]) ?>" id="formPlik">
+                    <div class="form-group">
+                        <?= $this->formLabel($nazwaPliku) ?>
+                        <?= $this->formElement($nazwaPliku) ?>
+                        <?= $this->formLabel($zawartoscPliku) ?>
+                        <?= $this->formElement($zawartoscPliku) ?>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" type="button" disabled id="btnWyslij">
+                    <span class="spinner-border spinner-border-sm" id="spinner" role="status" aria-hidden="true"></span>
+                    Wyślij
+                </button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,19 @@
+<div style='text-align:left;'>
+
+  <?php
+
+  $p = $details->photo;
+  $url = "https://farm%s.staticflickr.com/%s/%s_%s_z.jpg";
+  $iurl = sprintf($url, $p->farm, $p->server, $p->id, $p->secret);
+  ?>
+
+  <p><img src='<?= $iurl ?>'></p>
+
+  <p><strong>Autor:</strong> <?= $details->photo->owner->realname ?>
+    (<a href='<?= $this->url('flickr/default', ['action' => 'user', 'id' => urlencode($p->owner->nsid)]) ?>'><?= $details->photo->owner->username ?></a>)</p>
+  <p><strong>Tytuł:</strong> <?= $details->photo->title->_content ?></p>
+  <p><strong>Opis:</strong> <?= $details->photo->description->_content ?></p>
+
+  <?php //dd($p); 
+  ?>
+</div>

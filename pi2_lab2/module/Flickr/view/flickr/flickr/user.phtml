@@ -1,0 +1,68 @@
+<?php
+$this->inlineScript()->captureStart();
+echo <<<JS
+    $(function () {
+
+		$(".aShowImage").click(function () {
+			$("#modal .modal-body").load($(this).attr('href'), function () {
+				$('#modal').modal('show');
+            });
+			return false;
+		});
+		$("#overlay").hide();
+	});
+JS;
+$this->inlineScript()->captureEnd();
+?>
+<div class="row">
+  <div class="col-md-12">
+    <h1>Zdjęcia użytkownika </h1>
+  </div>
+  <div class="col-md-12">
+    <?php
+    $page = $user->photos->page;
+    // dd($user);
+    $url = "https://farm%s.staticflickr.com/%s/%s_%s_s.jpg";
+    foreach ($user->photos->photo as $p) : ?>
+      <a class='aShowImage' href='<?= $this->url('flickr/default', ['action' => 'details', 'id' => $p->id]) ?>'>
+        <img src='<?= sprintf($url, $p->farm, $p->server, $p->id, $p->secret) ?>'>
+      </a>
+
+    <?php endforeach ?>
+  </div>
+
+  <nav>
+    <ul class="pagination justify-content-center">
+      <?php if ($page > 1) : ?>
+        <li class="page-item">
+          <a href="<?= $this->url('flickr/default', ['action' => 'user', 'id' => urlencode($user->PI2_userID), 'page' => $page - 1]) ?>" class="page-link">
+            Poprzednia
+          </a>
+        </li>
+      <?php else : ?>
+        <li class="page-item disabled"><a href="#" class="page-link">Poprzednia</a></li>
+      <?php endif; ?>
+
+      <?php if ($page < $user->photos->pages) : ?>
+        <li class="page-item">
+          <a href="<?= $this->url('flickr/default', ['action' => 'user', 'id' => urlencode($user->PI2_userID), 'page' => $page + 1]) ?>" class="page-link">
+            Następna
+          </a>
+        </li>
+      <?php else : ?>
+        <li class="page-item disabled"><a href="#" class="page-link">Następna</a></li>
+      <?php endif; ?>
+    </ul>
+  </nav>
+
+</div>
+<div class="modal fade" id="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-body text-center"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
+      </div>
+    </div>
+  </div>
+</div>
